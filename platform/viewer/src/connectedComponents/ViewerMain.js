@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import memoize from 'lodash/memoize';
 import _values from 'lodash/values';
+import { setViewportSpecificData } from '@ohif/core/src/redux/actions';
 
 var values = memoize(_values);
 
@@ -70,7 +71,6 @@ class ViewerMain extends Component {
     const prevViewportAmount = prevProps.layout.viewports.length;
     const viewportAmount = this.props.layout.viewports.length;
     const isVtk = this.props.layout.viewports.some(vp => !!vp.vtk);
-
     if (
       this.props.studies !== prevProps.studies ||
       (viewportAmount !== prevViewportAmount && !isVtk)
@@ -201,8 +201,15 @@ class ViewerMain extends Component {
         type: 'error',
       });
     }
-
     this.props.setViewportSpecificData(viewportIndex, displaySet);
+    if (displaySet.frameRate !== undefined) {
+      this.props.setViewportSpecificData(viewportIndex, {
+        cine: {
+          cineFrameRate: 1000 / displaySet.frameRate,
+          isPlaying: true,
+        },
+      });
+    }
   };
 
   render() {
